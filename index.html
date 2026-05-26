@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Virtual Gurukul — Experience high-tech education blended with ancient Indian wisdom, Vedic Mathematics, Sanskrit literature, Yoga, and Ayurveda.">
+  <meta name="keywords" content="Virtual Gurukul, Vedic Mathematics, Sanskrit Learning, Yoga, Ayurveda, Ancient Indian Education, Gurukul Tradition, Guru AI">
+  <meta name="author" content="Virtual Gurukul Chancellor">
+  <title>Virtual Gurukul — Reviving Ancient Indian Wisdom Digitally</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen">
+    <div class="loader-mandala">
+      <div class="loader-inner">🕉️</div>
+    </div>
+    <div class="loader-text">VIRTUAL GURUKUL</div>
+    <div class="loader-text" style="font-size: 0.65rem; margin-top: 10px; opacity: 0.5; letter-spacing: 0.05em;">Laying Digital Foundations...</div>
+  </div>
+
+  <!-- CUSTOM GLOWING CURSOR -->
+  <div id="custom-cursor"></div>
+  <div id="custom-cursor-dot"></div>
+
+  <!-- FLOATING LOTUS BACKGROUND PARTICLES -->
+  <canvas id="lotus-canvas"></canvas>
+
+  <!-- APP SHELL CONTAINER -->
+  <div class="app-container">
+    
+    <!-- MAIN NAVIGATION HEADER -->
+    <header class="glass hoverable">
+      <a href="#" class="logo hoverable" id="logo-link">
+        🕉️ Gurukul<span>.edu</span>
+      </a>
+      
+      <nav id="nav-links">
+        <!-- Managed dynamically by router, but static fallbacks for layout sizing -->
+        <a href="#/" class="nav-item hoverable active" data-route="/">Home</a>
+        <a href="#/courses" class="nav-item hoverable" data-route="/courses">Courses</a>
+        <a href="#/classroom" class="nav-item hoverable" data-route="/classroom">Virtual Class</a>
+        <a href="#/dashboard" class="nav-item hoverable" id="nav-dashboard-link" data-route="/dashboard">Dashboard</a>
+      </nav>
+
+      <div class="header-controls">
+        <!-- Ambient Music Synthesizer Toggle -->
+        <button id="music-btn" class="btn-icon hoverable" title="Toggle Sitar/Tanpura Drone" aria-label="Toggle Sitar/Tanpura Drone">
+          📿
+        </button>
+
+        <!-- Dark/Light Theme Toggle -->
+        <button id="theme-btn" class="btn-icon hoverable" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
+          ☀️
+        </button>
+
+        <!-- User Authentication Quick Trigger -->
+        <div id="auth-header-btn-container">
+          <a href="#/login" class="btn btn-primary hoverable" id="auth-btn">Join Gurukul</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- CORE DYNAMIC APP VIEWPORT -->
+    <main id="app-view">
+      <!-- Loaded dynamically via app.js Router -->
+    </main>
+
+    <!-- FLOATING GURU AI WIDGET -->
+    <div id="ai-chat-widget">
+      <button class="ai-bubble hoverable" id="ai-toggle-btn" title="Ask Guru AI" aria-label="Ask Guru AI">
+        🧘
+      </button>
+      <div class="ai-panel glass">
+        <div class="ai-header">
+          <h3>🕉️ Guru AI Assistant</h3>
+          <button id="ai-close-btn" class="hoverable" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">×</button>
+        </div>
+        <div class="ai-messages" id="ai-messages-container">
+          <div class="ai-msg bot">
+            🙏 Pranam! I am <strong>Guru AI</strong>, your digital spiritual companion.
+            Ask me Sanskrit translations, Vedic maths problems, or suggest courses!
+          </div>
+        </div>
+        <form class="ai-input" id="ai-chat-form">
+          <input type="text" id="ai-user-input" placeholder="Ask Guru AI (e.g. Dharma, 85 squared)..." autocomplete="off" class="hoverable">
+          <button type="submit" class="hoverable">Seek</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MAIN COMPREHENSIVE FOOTER -->
+    <footer class="hoverable">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4 style="font-family: var(--font-heading); font-size: 1.25rem;">🕉️ Virtual Gurukul</h4>
+          <p style="margin-top: 15px; font-size: 0.88rem; line-height: 1.6;">
+            Blending the eternal guru-shishya lineage of Vedic India with future-generation browser architectures to democratize timeless wisdom.
+          </p>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Wisdom Streams</h4>
+          <a href="#/courses" class="hoverable">Vedic Mathematics</a>
+          <a href="#/courses" class="hoverable">Sanskrit Devbhasha</a>
+          <a href="#/courses" class="hoverable">Ashtanga Yoga & Dhyana</a>
+          <a href="#/courses" class="hoverable">Ayurveda Foundations</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Gurukul Portal</h4>
+          <a href="#/classroom" class="hoverable">Live Timetable</a>
+          <a href="#/dashboard" class="hoverable">Student Dashboard</a>
+          <a href="#/login" class="hoverable">Guru Enlistment</a>
+          <a href="#/dashboard" class="hoverable">Admin Command Dashboard</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Newsletter Dispatch</h4>
+          <p style="font-size: 0.82rem; margin-bottom: 15px;">Subscribe to receive Sanskrit sutras, astronomical analyses, and course dispatches directly.</p>
+          <form style="display: flex; gap: 8px;" id="newsletter-form">
+            <input type="email" placeholder="Your email..." required style="flex:1; padding: 10px; border-radius: 8px; border:1px solid rgba(254, 252, 247, 0.15); background: rgba(0,0,0,0.25); color: #fff; outline:none; font-size: 0.8rem;" class="hoverable">
+            <button type="submit" class="btn btn-primary hoverable" style="padding: 10px 14px;">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        &copy; 2026 Virtual Gurukul. All rights reserved. Created to preserve and digitize ancient Indian sciences.
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- POPUP BACKDROP DIALOG (Universal Modal for Quiz / Certificates) -->
+  <div class="modal-backdrop" id="universal-modal">
+    <div class="modal-card glass" id="universal-modal-content">
+      <!-- Loaded dynamically via app.js -->
+    </div>
+  </div>
+
+  <!-- SCRIPTS BINDINGS -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
