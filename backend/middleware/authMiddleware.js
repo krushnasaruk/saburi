@@ -1,9 +1,9 @@
 /**
- * Virtual Gurukul - JWT Validation & Role-Based Authorization Middlewares
+ * Virtual Gurukul - JWT Validation & Role-Based Authorization Middlewares (Prisma/SQL)
  */
 
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const prisma = require("../config/prisma");
 
 // Verifies Bearer tokens in headers and matches DB users
 const protect = async (req, res, next) => {
@@ -17,11 +17,18 @@ const protect = async (req, res, next) => {
       // Decode token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || "vedic_sacred_key");
 
-      // Retrieve user from DB, omitting password field
-      req.user = await User.findById(decoded.id).select("-password");
-      if (!req.user) {
+      // Retrieve user from DB
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id }
+      });
+
+      if (!user) {
         return res.status(401).json({ success: false, message: "User not found in Gurukul logs." });
       }
+
+      // Omit password field
+      delete user.password;
+      req.user = user;
 
       next();
     } catch (error) {
