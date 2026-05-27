@@ -1,10 +1,8 @@
 /**
- * Virtual Gurukul - Course Controllers & Admin Analytics API
+ * Virtual Gurukul - Course Controllers & Admin Analytics API (Prisma/SQL)
  */
 
-const Course = require("../models/Course");
-const User = require("../models/User");
-const Enrollment = require("../models/Enrollment");
+const prisma = require("../config/prisma");
 
 // @desc    Get all courses with optional filters
 // @route   GET /api/courses
@@ -12,12 +10,18 @@ const Enrollment = require("../models/Enrollment");
 exports.getCourses = async (req, res) => {
   try {
     const { level, category } = req.query;
-    let query = {};
+    let where = {};
 
-    if (level) query.level = level;
-    if (category) query.category = category;
+    if (level) where.level = level;
+    if (category) where.category = category;
 
-    const courses = await Course.find(query);
+    const courses = await prisma.course.findMany({
+      where,
+      include: {
+        lessons: true,
+        questions: true
+      }
+    });
     res.json({ success: true, count: courses.length, courses });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -29,7 +33,13 @@ exports.getCourses = async (req, res) => {
 // @access  Public
 exports.getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id },
+      include: {
+        lessons: true,
+        questions: true
+      }
+    });
     if (!course) {
       return res.status(404).json({ success: false, message: "Course archive not found." });
     }
@@ -44,7 +54,30 @@ exports.getCourseById = async (req, res) => {
 // @access  Private (Guru / Admin only)
 exports.createCourse = async (req, res) => {
   try {
-    const newCourse = await Course.create(req.body);
+    const { lessons, quiz, ...courseData } = req.body;
+    
+    // Convert Mongoose nested structure to Prisma nested create
+    const createData = { ...courseData };
+    
+    if (lessons && lessons.length > 0) {
+      createData.lessons = {
+        create: lessons
+      };
+    }
+    
+    if (quiz && quiz.questions && quiz.questions.length > 0) {
+      createData.questions = {
+        create: quiz.questions
+      };
+    }
+
+    const newCourse = await prisma.course.create({
+      data: createData,
+      include: {
+        lessons: true,
+        questions: true
+      }
+    });
     res.status(201).json({ success: true, course: newCourse });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -56,11 +89,15 @@ exports.createCourse = async (req, res) => {
 // @access  Private (Admin only)
 exports.deleteCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id }
+    });
     if (!course) {
       return res.status(404).json({ success: false, message: "Course already removed or missing." });
     }
-    await Course.findByIdAndDelete(req.params.id);
+    await prisma.course.delete({
+      where: { id: req.params.id }
+    });
     res.json({ success: true, message: "Course archive wiped successfully." });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -72,11 +109,14 @@ exports.deleteCourse = async (req, res) => {
 // @access  Private (Admin only)
 exports.getAnalytics = async (req, res) => {
   try {
-    const usersCount = await User.countDocuments();
-    const coursesCount = await Course.countDocuments();
-    const enrollmentsCount = await Enrollment.countDocuments();
+    const usersCount = await prisma.user.count();
+    const coursesCount = await prisma.course.count();
+    const enrollmentsCount = await prisma.enrollment.count();
 
-    const users = await User.find().select("xp streak");
+    const users = await prisma.user.findMany({
+      select: { xp: true, streak: true }
+    });
+    
     const totalXP = users.reduce((acc, u) => acc + u.xp, 0);
     const averageStreak = users.length > 0 ? (users.reduce((acc, u) => acc + u.streak, 0) / users.length).toFixed(1) : 0;
 

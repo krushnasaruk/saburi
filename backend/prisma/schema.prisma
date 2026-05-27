@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  fullName  String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      String   @default("student")
+  avatar    String   @default("🕉️")
+  xp        Int      @default(100)
+  streak    Int      @default(1)
+  lastLogin DateTime @default(now())
+  badges    String[] @default(["veda_novice"])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enrollments Enrollment[]
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  title       String       @unique
+  category    String
+  instructor  String
+  duration    String
+  level       String
+  rating      Float        @default(4.8)
+  xpAward     Int          @default(150)
+  thumbnail   String       @default("assets/sanskrit_manuscript.png")
+  description String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lessons     Lesson[]
+  questions   Question[]
+  enrollments Enrollment[]
+}
+
+model Lesson {
+  id        String  @id @default(uuid())
+  title     String
+  duration  String
+  content   String
+  notes     String?
+  videoUrl  String? @default("https://www.w3schools.com/html/mov_bbb.mp4")
+  
+  courseId  String
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id       String   @id @default(uuid())
+  q        String
+  options  String[]
+  answer   Int
+  
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Enrollment {
+  id          String   @id @default(uuid())
+  lessonIndex Int      @default(0)
+  completed   Boolean  @default(false)
+  quizScore   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}

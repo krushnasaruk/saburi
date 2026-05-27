@@ -1,9 +1,10 @@
 /**
- * Virtual Gurukul - Authentication Controllers
+ * Virtual Gurukul - Authentication Controllers (Prisma/SQL)
  */
 
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const prisma = require("../config/prisma");
 
 // Generate JWT token utility
 const generateToken = (id) => {
@@ -20,38 +21,50 @@ exports.registerUser = async (req, res) => {
     const { fullName, username, email, password, role } = req.body;
 
     // Check if user already exists
-    const userExists = await User.findOne({ $or: [{ email }, { username }] });
+    const userExists = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: email.toLowerCase() },
+          { username: username.toLowerCase() }
+        ]
+      }
+    });
+
     if (userExists) {
       return res.status(400).json({ success: false, message: "Username or Email already registered in Gurukul." });
     }
 
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     // Create user
-    const user = await User.create({
-      fullName,
-      username,
-      email,
-      password,
-      role: role || "student",
-      avatar: role === "guru" ? "🧘" : role === "admin" ? "👑" : "🕉️"
+    const user = await prisma.user.create({
+      data: {
+        fullName,
+        username: username.toLowerCase(),
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: role || "student",
+        avatar: role === "guru" ? "🧘" : role === "admin" ? "👑" : "🕉️"
+      }
     });
 
-    if (user) {
-      res.status(201).json({
-        success: true,
-        token: generateToken(user._id),
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          avatar: user.avatar,
-          xp: user.xp,
-          streak: user.streak,
-          badges: user.badges
-        }
-      });
-    }
+    res.status(201).json({
+      success: true,
+      token: generateToken(user.id),
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        xp: user.xp,
+        streak: user.streak,
+        badges: user.badges
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -62,45 +75,60 @@ exports.registerUser = async (req, res) => {
 // @access  Public
 exports.loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body; // username can be username or email
+    const { username, password } = req.body;
 
     // Check for user
-    const user = await User.findOne({
-      $or: [{ email: username.toLowerCase() }, { username: username.toLowerCase() }]
-    }).select("+password");
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: username.toLowerCase() },
+          { username: username.toLowerCase() }
+        ]
+      }
+    });
 
-    if (user && (await user.matchPassword(password))) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       
       // Calculate streak boost
       const today = new Date().toDateString();
       const lastLog = new Date(user.lastLogin).toDateString();
+      
+      let newStreak = user.streak;
+      let newXp = user.xp;
       
       if (today !== lastLog) {
         const msDiff = new Date(today) - new Date(lastLog);
         const daysDiff = msDiff / (1000 * 60 * 60 * 24);
         
         if (daysDiff === 1) {
-          user.streak += 1;
-          user.xp += 20; // 20 XP streak gift
+          newStreak += 1;
+          newXp += 20; // 20 XP streak gift
         } else if (daysDiff > 1) {
-          user.streak = 1; // reset
+          newStreak = 1; // reset
         }
-        user.lastLogin = Date.now();
-        await user.save();
+        
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            streak: newStreak,
+            xp: newXp,
+            lastLogin: new Date()
+          }
+        });
       }
 
       res.json({
         success: true,
-        token: generateToken(user._id),
+        token: generateToken(user.id),
         user: {
-          id: user._id,
+          id: user.id,
           fullName: user.fullName,
           username: user.username,
           email: user.email,
           role: user.role,
           avatar: user.avatar,
-          xp: user.xp,
-          streak: user.streak,
+          xp: newXp,
+          streak: newStreak,
           badges: user.badges
         }
       });

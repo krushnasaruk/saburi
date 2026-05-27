@@ -6,12 +6,8 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
-
-// Connect database Mongoose adapter
-connectDB();
 
 const app = express();
 
@@ -25,7 +21,7 @@ app.get("/", (req, res) => {
     status: "active",
     platform: "Virtual Gurukul API Matrix",
     linage: "Guru-Shishya traditional digital system",
-    version: "1.0.0"
+    version: "1.0.0 (Prisma/SQL Edition)"
   });
 });
 
